@@ -63,20 +63,7 @@ installed. Therefore we will have to download one manually.
 ### FAQ
 
 #### Why did you create this fork?
-I am just running the default Qnap web server on a custom domain. I had some problems getting the python web server working in Yannik's project, so i decided to fork and pursue a different approach.
+Got this script which is working perfectly. However I wanted more control and logs from it.
 
-#### What's different to Yannik's original script?
-- we install a custom QNAP-compatible LetsEncrypt package so we can run the letsencrypt client natively. This means we don't run the Python web server, or the acme-tiny client. Note: Previously used QPython2, a 1GB monster that was overkill, but that was because there was no other convenient source for the letsencrypt client which does not run natively on qnap OS. QPython is sourced from [here](http://forum.qnap.com/viewtopic.php?f=217&t=109899).
-- only support for one domain; you are welcome to fork and figure out your own approach ;-)
- 
-#### There is a newer version of QPython2, why aren't you using that?
-letsencrypt seems to have some broken dependencies in 2_2.7.11.0.1 and isn't working. 
-
-#### I disagree with your terrible code!
-I'm no expert, please respond if you have some feedback for me.
-
-#### How can I contribute anything to this project?
-Please open a pull request!
-
-#### What license is this code licensed under?
-GPLv2
+#### What's different to Szech's original script?
+- Added error handler with hability to notify with QNAP internal system (Log & email)
