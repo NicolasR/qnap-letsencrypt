@@ -10,7 +10,7 @@ Once that is done, you can create a cronjob to automatically renew the certifica
 1. Login to your NAS and make sure Git is installed.
 1. [ssh](https://wiki.qnap.com/wiki/How_to_SSH_into_your_QNAP_device) is also required.
 1. Add the qnapclub.eu repo to the App Center. You can find the instructions [here](http://qnapclub.eu/index.php?act=howto)
-1. Go into the new Qnapclub.eu repo, and install QPython2.
+1. Go into the new Qnapclub.eu repo, and install QPython3.
 1. Make sure your NAS is reachable from the public internet under the domain you want to get a certificate for on port 80.
 1. Create a folder to store qnap-letsencrypt in under `/share/YOUR_DRIVE/`. Do not create it directly in `/share/`, as it will be lost after a reboot!
 
@@ -70,25 +70,3 @@ Got this script which is working perfectly. However I wanted more control and lo
 
 #### What's different to Szech's original script?
 - Added error handler with hability to notify with QNAP internal system (Log & email)
-
-#### What's different to Yannik's original script?
-we install a custom QNAP-compatible LetsEncrypt package so we can run the letsencrypt client natively. This means we don't run the Python web server, or the acme-tiny client. 
-
-#### What's this QPython2 thing i have to install?
-QPython2 is a convenient source for the letsencrypt client which does not run natively on qnap OS. QPython is sourced from [here](https://forum.qnap.com/viewtopic.php?f=217&t=109899).
-
-#### Any multi-domain support?
-only support for one domain; you are welcome to fork and figure out your own approach ;-)
- 
-#### There is a smaller package available for LetsEncrypt, why aren't you using that?
-That package is not compiled for x64 and isn't working with firmware 4.3.0+ 
-
-#### I disagree with your terrible code!
-I'm no expert in linux, nas or encryption, so please respond if you have some feedback for me.
-This is just a hobby project for my own education, and peace of mind :)
-
-#### How can I contribute anything to this project?
-Please open a pull request!
-
-#### What license is this code licensed under?
-GPLv2

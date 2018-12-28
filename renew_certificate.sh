@@ -2,17 +2,18 @@
 set -e
 export PATH=/opt/QPython3/bin:$PATH
 export PATH=/opt/LetsEncrypt/bin:$PATH
-PATH="$PATH:/usr/bin:/usr/sbin"
 
-# VARIABLES, replace these with your own.
+# VARIABLES
 DOMAIN=""
 DOMAINDIR=""
 EMAIL=""
-WEBPATH="/share/Web/"
 QTSNOTIFICATION=true
-LOGFILE=""
-DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Script variables
+WEBPATH="/share/Web/"
+DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONFIGDIR=$DIR/letsencrypt
+CERTFILENAME="cert.pem"
 
 # FUNCTIONS
 function notify
@@ -24,15 +25,16 @@ function notify
 }
 
 ###########################################
+echo "Creating folder $DOMAINDIR"
 mkdir -p "$DOMAINDIR"
 
 # do nothing if certificate is valid for more than 30 days (30*24*60*60)
 echo "Checking whether to renew certificate on $(date -R)"
-[ -s "$DOMAINDIR/cert.pem" ] && openssl x509 -in "$DOMAINDIR/cert.pem" -checkend 864000 && exit
+[ -s "$DOMAINDIR/$CERTFILENAME" ] && openssl x509 -in "$DOMAINDIR/$CERTFILENAME" -checkend 864000 && exit
 
 echo "Running letsencrypt, Getting/Renewing certificate..."
 (
-     certbot certonly --rsa-key-size 4096 --renew-by-default --webroot --webroot-path $WEBPATH -d $DOMAIN -t --agree-tos --email $EMAIL --config-dir $DIR/letsencrypt
+     certbot certonly --rsa-key-size 4096 --renew-by-default --webroot --webroot-path $WEBPATH -d $DOMAIN -t --agree-tos --email $EMAIL --config-dir $CONFIGDIR
 )
 
 if [ "$?" -ne 0 ];
@@ -53,11 +55,11 @@ echo "live directory = $DOMAINDIR"
 cd "$DOMAINDIR"
 cp /etc/stunnel/stunnel.pem /etc/stunnel/stunnel.pem.old
 cp /etc/stunnel/uca.pem /etc/stunnel/uca.pem.old
-cat privkey.pem cert.pem > /etc/stunnel/stunnel.pem
+cat privkey.pem $CERTFILENAME > /etc/stunnel/stunnel.pem
 cp chain.pem /etc/stunnel/uca.pem
 if [ ! -s /etc/stunnel/stunnel.pem ]
 then
-  echo "Error occured, restoring files"
+  notify "[LetsEncrypt] Error occured, files are empty, restoring files" 2
   cp -rf /etc/stunnel/stunnel.pem.old /etc/stunnel/stunnel.pem
   cp -rf /etc/stunnel/uca.pem.old /etc/stunnel/uca.pem
 fi
