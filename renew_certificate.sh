@@ -1,19 +1,16 @@
 #!/bin/bash
 set -e
-export PATH=/opt/QPython3/bin:$PATH
-export PATH=/opt/LetsEncrypt/bin:$PATH
+export PATH=/opt/LEgo/bin:$PATH
+PATH="$PATH:/usr/bin:/usr/sbin"
 
-# VARIABLES
-DOMAIN=""
-DOMAINDIR=""
-EMAIL=""
-QTSNOTIFICATION=true
-
-# Script variables
+# VARIABLES, replace these with your own.
+DOMAIN="domain"
+EMAIL="email"
 WEBPATH="/share/Web/"
+QTSNOTIFICATION=true
+LOGFILE=""
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CONFIGDIR=$DIR/letsencrypt
-CERTFILENAME="cert.pem"
+DAYSEXPIRATION=15
 
 # FUNCTIONS
 function notify
@@ -25,17 +22,23 @@ function notify
 }
 
 ###########################################
-echo "Creating folder $DOMAINDIR"
-mkdir -p "$DOMAINDIR"
+echo DOMAIN = $DOMAIN
+echo EMAIL = $EMAIL
+echo DIR = $DIR
+
+WORKDIR="$DIR/LEgo"
+CERTIFICATENAME="$DOMAIN.pem"
+CERTIFICATESDIR="$WORKDIR/certificates"
 
 # do nothing if certificate is valid for more than 30 days (30*24*60*60)
-echo "Checking whether to renew certificate on $(date -R)"
-[ -s "$DOMAINDIR/$CERTFILENAME" ] && openssl x509 -in "$DOMAINDIR/$CERTFILENAME" -checkend 864000 && exit
+echo "Checking whether to renew certificate on next $DAYSEXPIRATION days"
+[ -s "$CERTIFICATESDIR/$CERTIFICATENAME" ] && openssl x509 -in "$CERTIFICATESDIR/$CERTIFICATENAME" -checkend $(( 86400 * $DAYSEXPIRATION )) && exit
 
 echo "Running letsencrypt, Getting/Renewing certificate..."
 (
-     certbot certonly --rsa-key-size 4096 --renew-by-default --webroot --webroot-path $WEBPATH -d $DOMAIN -t --agree-tos --email $EMAIL --config-dir $CONFIGDIR
+  lego --accept-tos --pem --key-type rsa2048 --http --http.webroot $WEBPATH --domains $DOMAIN --email $EMAIL --path $WORKDIR run
 )
+
 
 if [ "$?" -ne 0 ];
 then
@@ -51,17 +54,15 @@ fi
 echo "Stopping stunnel and setting new stunnel certificates..."
 /etc/init.d/stunnel.sh stop
 
-echo "live directory = $DOMAINDIR"
-cd "$DOMAINDIR"
+echo "live directory = $WORKDIR"
+cd "$CERTIFICATESDIR"
 cp /etc/stunnel/stunnel.pem /etc/stunnel/stunnel.pem.old
-cp /etc/stunnel/uca.pem /etc/stunnel/uca.pem.old
-cat privkey.pem $CERTFILENAME > /etc/stunnel/stunnel.pem
-cp chain.pem /etc/stunnel/uca.pem
+cp "$CERTIFICATENAME" /etc/stunnel/stunnel.pem
+
 if [ ! -s /etc/stunnel/stunnel.pem ]
 then
-  notify "[LetsEncrypt] Error occured, files are empty, restoring files" 2
+  echo "Error occured, restoring files"
   cp -rf /etc/stunnel/stunnel.pem.old /etc/stunnel/stunnel.pem
-  cp -rf /etc/stunnel/uca.pem.old /etc/stunnel/uca.pem
 fi
 
 echo "Done! Service startup and cleanup will follow now..."

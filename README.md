@@ -7,12 +7,12 @@ Once that is done, you can create a cronjob to automatically renew the certifica
 ## Install Instructions
 ### NAS Setup
 1. Your NAS is expected to be on firmware 4.3.0 or later.
-1. Login to your NAS and make sure Git is installed.
-1. [ssh](https://wiki.qnap.com/wiki/How_to_SSH_into_your_QNAP_device) is also required.
-1. Add the qnapclub.eu repo to the App Center. You can find the instructions [here](http://qnapclub.eu/index.php?act=howto)
-1. Go into the new Qnapclub.eu repo, and install QPython3.
-1. Make sure your NAS is reachable from the public internet under the domain you want to get a certificate for on port 80.
-1. Create a folder to store qnap-letsencrypt in under `/share/YOUR_DRIVE/`. Do not create it directly in `/share/`, as it will be lost after a reboot!
+2. Login to your NAS and make sure Git is installed.
+3. [ssh](https://wiki.qnap.com/wiki/How_to_SSH_into_your_QNAP_device) is also required.
+4. Add the qnapclub.eu repo to the App Center. You can find the instructions [here](http://qnapclub.eu/index.php?act=howto)
+5. Go into the new Qnapclub.eu repo, and install [LEgo](https://www.qnapclub.eu/fr/qpkg/456).
+6. Make sure your NAS is reachable from the public internet under the domain you want to get a certificate for on port 80.
+7. Create a folder to store qnap-letsencrypt in under `/share/YOUR_DRIVE/`. Do not create it directly in `/share/`, as it will be lost after a reboot!
 
 
 ### Setting up a valid ca-bundle and cloning this repo
@@ -46,11 +46,9 @@ installed. Therefore we will have to download one manually.
 ### Setting up qnap-letsencrypt
 1. Edit `renew_certificate` and put your own values in the `VARIABLES` section   
 
-2. `mv /etc/stunnel/stunnel.pem /etc/stunnel/stunnel.pem.orig` (backup, though we can always recover through the web gui)
+2. Run `renew_certificate.sh`
 
-3. Run `renew_certificate.sh`
-
-4. Create a cronjob to run `renew_certificate.sh` every night, which will renew your certificate if it has less than 10 days left
+3. Create a cronjob to run `renew_certificate.sh` every night, which will renew your certificate if it has less than 10 days left
 
     Add this to `/etc/config/crontab`:
     ```
@@ -70,3 +68,4 @@ Got this script which is working perfectly. However I wanted more control and lo
 
 #### What's different to Szech's original script?
 - Added error handler with hability to notify with QNAP internal system (Log & email)
+- Replaced LetsEncrypt package (obsolete) by LEgo
